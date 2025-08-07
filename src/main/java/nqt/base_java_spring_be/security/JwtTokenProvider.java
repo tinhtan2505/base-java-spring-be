@@ -32,8 +32,7 @@ public class JwtTokenProvider {
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusMillis(jwtExpirationMs)))
-                .signWith(jwtSecret, Jwts.SIG.HS512) // ⬅️ cú pháp mới
-                .serializeToJsonWith(new JacksonSerializer<>()) // ⬅️ bắt buộc nếu dùng jackson
+                .signWith(jwtSecret, Jwts.SIG.HS512) 
                 .compact();
     }
 
@@ -46,7 +45,6 @@ public class JwtTokenProvider {
         try {
             Jwts.parser()
                     .verifyWith(jwtSecret)
-                    .json(new JacksonDeserializer<>()) // ⬅️ bắt buộc nếu dùng jackson
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -65,9 +63,8 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromToken(String token) {
-        Jwt<Header, Claims> jwt = Jwts.parser()
+        Jws<Claims> jwt = Jwts.parser()
                 .verifyWith(jwtSecret)
-                .json(new JacksonDeserializer<>())
                 .build()
                 .parseSignedClaims(token);
         return jwt.getPayload().getSubject();
