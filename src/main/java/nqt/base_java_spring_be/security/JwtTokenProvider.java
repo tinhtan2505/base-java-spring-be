@@ -32,7 +32,7 @@ public class JwtTokenProvider {
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusMillis(jwtExpirationMs)))
-                .signWith(jwtSecret, Jwts.SIG.HS512) 
+                .signWith(jwtSecret, Jwts.SIG.HS512)
                 .compact();
     }
 
