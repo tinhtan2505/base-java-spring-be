@@ -12,13 +12,11 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public class CustomResponse<T> {
     private String message;
-    private int status;
     private T result;
     private Object metadata;
 
     public CustomResponse(String message, int status, T result) {
         this.message = message;
-        this.status = status;
         this.result = result;
     }
 
@@ -36,7 +34,6 @@ public class CustomResponse<T> {
     public String toString() {
         return "CustomResponse{" +
                 "message='" + message + '\'' +
-                ", status=" + status +
                 ", result=" + result +
                 ", metadata=" + metadata +
                 '}';
