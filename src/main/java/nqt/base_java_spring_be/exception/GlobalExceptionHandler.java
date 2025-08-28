@@ -100,4 +100,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(CustomResponse.error("Có lỗi xảy ra, vui lòng thử lại!", HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<CustomResponse<Void>> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CustomResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+    }
+
 }

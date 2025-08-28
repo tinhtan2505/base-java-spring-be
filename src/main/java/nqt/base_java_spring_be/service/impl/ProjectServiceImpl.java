@@ -2,6 +2,7 @@ package nqt.base_java_spring_be.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import nqt.base_java_spring_be.entity.Project;
+import nqt.base_java_spring_be.exception.BadRequestException;
 import nqt.base_java_spring_be.exception.ResourceNotFoundException;
 import nqt.base_java_spring_be.repository.ProjectRepository;
 import nqt.base_java_spring_be.service.iservices.ProjectService;
@@ -19,7 +20,13 @@ public class ProjectServiceImpl  implements ProjectService {
 
     @Override
     public Project create(Project project) {
-        // Thêm các kiểm tra/logic nếu cần
+        String code = project.getCode() == null ? null : project.getCode().trim();
+        if (code == null || code.isEmpty()) {
+            throw new BadRequestException("Mã dự án không được để trống");
+        }
+        if (repo.existsByCode(project.getCode())) {
+            throw new BadRequestException("Mã dự án đã tồn tại: " + project.getCode());
+        }
         return repo.save(project);
     }
 
