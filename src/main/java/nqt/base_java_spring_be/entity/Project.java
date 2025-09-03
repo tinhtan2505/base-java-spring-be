@@ -34,8 +34,8 @@ public class Project extends BaseEntity {
     @Column(length = 255)
     String owner;
 
-    @Enumerated(EnumType.STRING)   // Lưu dạng text "PLANNING", "ACTIVE", ...
-    @Column(length = 20, nullable = false)
+    @Enumerated(EnumType.ORDINAL)
+    @Column(nullable = false)
     ProjectStatus status;
 
     @Column(name = "start_date")

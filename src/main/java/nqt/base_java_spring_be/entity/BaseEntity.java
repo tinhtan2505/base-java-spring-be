@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.UUID;
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
@@ -33,12 +34,12 @@ public abstract class BaseEntity implements Serializable {
     private boolean active = true;
 
     @CreatedBy
-    @Column(name = "nguoi_tao", updatable = false/*, columnDefinition = "uuid"*/)
-    private java.util.UUID createdBy;
+    @Column(name = "nguoi_tao", updatable = false)
+    private UUID createdBy;
 
     @LastModifiedBy
-    @Column(name = "nguoi_sua"/*, columnDefinition = "uuid"*/)
-    private java.util.UUID updatedBy;
+    @Column(name = "nguoi_sua")
+    private UUID updatedBy;
 
     /** Soft delete: đánh dấu đã xóa và vô hiệu hóa. */
     public void markDeleted() {

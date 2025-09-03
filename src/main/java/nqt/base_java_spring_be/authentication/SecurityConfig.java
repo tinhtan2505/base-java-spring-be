@@ -1,5 +1,8 @@
 package nqt.base_java_spring_be.authentication;
 
+import nqt.base_java_spring_be.repository.UserRepository;
+import nqt.base_java_spring_be.security.JwtAuthenticationFilter;
+import nqt.base_java_spring_be.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,9 +28,15 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final UserDetailsService userDetailsService;
+    private final JwtTokenProvider tokenProvider;
+    private final UserRepository userRepository;
 
-    public SecurityConfig(UserDetailsService userDetailsService) {
+    public SecurityConfig(UserDetailsService userDetailsService,
+                          JwtTokenProvider tokenProvider,
+                          UserRepository userRepository) {
         this.userDetailsService = userDetailsService;
+        this.tokenProvider = tokenProvider;
+        this.userRepository = userRepository;
     }
 
     @Bean
@@ -48,9 +57,12 @@ public class SecurityConfig {
                                         "/swagger-resources/**",
                                         "/swagger-ui.html",
                                         "/webjars/**").permitAll()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 )
-                .userDetailsService(userDetailsService);  // Cấu hình UserDetailsService
+                .userDetailsService(userDetailsService)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, userRepository),
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
