@@ -63,4 +63,33 @@ public class ProjectController {
                 .body(CustomResponse.success(data, "Tạo mới thành công"));
     }
 
+    @PutMapping("{id}")
+    public ResponseEntity<CustomResponse<Project>> update(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProjectCreateRequest req
+    ) {
+        // map từ request sang entity update
+        var updateEntity = Project.builder()
+                .code(req.getCode())
+                .name(req.getName())
+                .owner(req.getOwner())
+                .status(req.getStatus())
+                .startDate(req.getStartDate())
+                .dueDate(req.getDueDate())
+                .budget(req.getBudget())
+                .progress(req.getProgress())
+                .tags(req.getTags())
+                .description(req.getDescription())
+                .build();
+
+        var data = service.update(id, updateEntity);
+        return ResponseEntity.ok(CustomResponse.success(data, "Cập nhật thành công"));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<CustomResponse<Void>> delete(@PathVariable UUID id) {
+        service.delete(id);
+        return ResponseEntity.ok(CustomResponse.success(null, "Xóa thành công"));
+    }
+
 }

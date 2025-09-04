@@ -21,9 +21,7 @@ public class JwtTokenProvider {
     private final UserRepository userRepository;
 
     // Tạo khóa bí mật 512-bit cho HS512
-    private final SecretKey jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-
-    private final long jwtExpirationMs = 86400000; // 24 hours
+    private final SecretKey jwtSecret = Jwts.SIG.HS512.key().build();
 
     public JwtTokenProvider(TokenBlacklist tokenBlacklist, UserRepository userRepository) {
         this.tokenBlacklist = tokenBlacklist;
@@ -46,6 +44,8 @@ public class JwtTokenProvider {
                     .orElse(null);
         }
 
+        // 24 hours
+        long jwtExpirationMs = 86400000;
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(Date.from(Instant.now()))

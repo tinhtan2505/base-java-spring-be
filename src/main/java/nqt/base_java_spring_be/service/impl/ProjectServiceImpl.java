@@ -46,10 +46,40 @@ public class ProjectServiceImpl  implements ProjectService {
 
     @Override
     public Project update(UUID id, Project update) {
+        // Lấy bản ghi hiện tại (đã ẩn soft-delete trong findById)
         Project current = findById(id);
+
+        // ---- Validate code (nếu đổi code thì phải unique) ----
+        String newCode = update.getCode() == null ? null : update.getCode().trim();
+        if (newCode == null || newCode.isEmpty()) {
+            throw new BadRequestException("Mã dự án không được để trống");
+        }
+        // Nếu code thay đổi, kiểm tra trùng
+        if (!newCode.equalsIgnoreCase(current.getCode())) {
+            boolean exists = repo.existsByCodeIgnoreCaseAndIdNot(newCode, id);
+            if (exists) {
+                throw new BadRequestException("Mã dự án đã tồn tại: " + newCode);
+            }
+            current.setCode(newCode);
+        }
+
+        // ---- Gán các trường thuộc Project (KHÔNG chạm BaseEntity) ----
         current.setName(update.getName());
+        current.setOwner(update.getOwner());
+        current.setStatus(update.getStatus());
+        current.setStartDate(update.getStartDate());
+        current.setDueDate(update.getDueDate());
+        current.setBudget(update.getBudget());
+        current.setProgress(update.getProgress());
+        // Với @ElementCollection, set trực tiếp list mới (ghi đè toàn bộ)
+        current.setTags(update.getTags());
+        current.setDescription(update.getDescription());
+
+        // Không động vào: createdAt, updatedAt, deletedAt, active, createdBy, updatedBy (Auditing tự xử lý)
+
         return repo.save(current);
     }
+
 
     @Override
     public void delete(UUID id) {

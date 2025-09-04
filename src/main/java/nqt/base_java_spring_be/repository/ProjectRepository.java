@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface ProjectRepository extends JpaRepository<Project, UUID> {
     List<Project> findByActiveTrue();
     boolean existsByCode(String code);
+    boolean existsByCodeIgnoreCaseAndIdNot(String code, UUID id);
 }
