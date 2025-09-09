@@ -5,7 +5,7 @@ import lombok.Data;
 import nqt.base_java_spring_be.enums.ProjectStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -24,8 +24,8 @@ public class ProjectCreateRequest {
     @NotNull
     private ProjectStatus status;
 
-    private LocalDateTime startDate;
-    private LocalDateTime dueDate;
+    private LocalDate startDate;
+    private LocalDate dueDate;
 
     @Digits(integer = 16, fraction = 2)
     @PositiveOrZero

@@ -6,7 +6,9 @@ import lombok.experimental.FieldDefaults;
 import nqt.base_java_spring_be.enums.ProjectStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,10 +41,10 @@ public class Project extends BaseEntity {
     ProjectStatus status;
 
     @Column(name = "start_date")
-    LocalDateTime startDate;
+    LocalDate startDate;
 
     @Column(name = "due_date")
-    LocalDateTime dueDate;
+    LocalDate dueDate;
 
     @Column(precision = 18, scale = 2)
     BigDecimal budget;
