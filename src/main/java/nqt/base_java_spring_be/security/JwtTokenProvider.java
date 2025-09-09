@@ -2,14 +2,18 @@ package nqt.base_java_spring_be.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import nqt.base_java_spring_be.entity.User;
 import nqt.base_java_spring_be.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import nqt.base_java_spring_be.authentication.dto.UserPrincipal;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -21,11 +25,43 @@ public class JwtTokenProvider {
     private final UserRepository userRepository;
 
     // Tạo khóa bí mật 512-bit cho HS512
-    private final SecretKey jwtSecret = Jwts.SIG.HS512.key().build();
+//    private final SecretKey jwtSecret = Jwts.SIG.HS512.key().build();
+    private final SecretKey jwtSecretKey;
+    private final long jwtExpirationMs;
+    private final String issuer; // optional
+    private final JwtParser jwtParser;
 
-    public JwtTokenProvider(TokenBlacklist tokenBlacklist, UserRepository userRepository) {
+    public JwtTokenProvider(TokenBlacklist tokenBlacklist,
+                            UserRepository userRepository,
+                            @Value("${jwt.secret}") String secret,
+                            @Value("${jwt.expiration}") long jwtExpirationMs,
+                            @Value("${jwt.issuer:}") String issuer) {
         this.tokenBlacklist = tokenBlacklist;
         this.userRepository = userRepository;
+        this.jwtExpirationMs = jwtExpirationMs;
+        this.issuer = issuer;
+
+        // Cho phép lưu secret ở dạng Base64 hoặc plain text (>= 64 bytes cho HS512)
+        byte[] keyBytes = tryDecodeBase64(secret);
+        if (keyBytes == null) {
+            keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        }
+        this.jwtSecretKey = Keys.hmacShaKeyFor(keyBytes);
+
+        // Reuse parser cho mọi lần verify
+        this.jwtParser = Jwts.parser()
+                .verifyWith(jwtSecretKey)
+                .build();
+    }
+
+    private byte[] tryDecodeBase64(String maybeB64) {
+        try {
+            byte[] decoded = Base64.getDecoder().decode(maybeB64);
+            // Đảm bảo độ dài key hợp lệ cho HS512 (>= 64 bytes)
+            return decoded.length >= 64 ? decoded : null;
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
     public String generateToken(Authentication authentication) {
@@ -33,14 +69,14 @@ public class JwtTokenProvider {
 
         // Lấy UUID user. Nếu principal là entity User hay custom principal, lấy id trực tiếp.
         UUID uid = null;
-        if (userDetails instanceof nqt.base_java_spring_be.entity.User u) {
+        if (userDetails instanceof User u) {
             uid = u.getId();
         } else if (userDetails instanceof UserPrincipal up) {
             uid = up.getId();
         } else {
             // fallback: tra DB
             uid = userRepository.findByUsername(userDetails.getUsername())
-                    .map(nqt.base_java_spring_be.entity.User::getId)
+                    .map(User::getId)
                     .orElse(null);
         }
 
@@ -51,7 +87,7 @@ public class JwtTokenProvider {
                 .issuedAt(Date.from(Instant.now()))
                 .expiration(Date.from(Instant.now().plusMillis(jwtExpirationMs)))
                 .claims(Map.of("uid", uid != null ? uid.toString() : null))
-                .signWith(jwtSecret, Jwts.SIG.HS512)
+                .signWith(jwtSecretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
@@ -63,7 +99,7 @@ public class JwtTokenProvider {
 
         try {
             Jwts.parser()
-                    .verifyWith(jwtSecret)
+                    .verifyWith(jwtSecretKey)
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -83,14 +119,14 @@ public class JwtTokenProvider {
 
     public String getUsernameFromToken(String token) {
         Jws<Claims> jwt = Jwts.parser()
-                .verifyWith(jwtSecret)
+                .verifyWith(jwtSecretKey)
                 .build()
                 .parseSignedClaims(token);
         return jwt.getPayload().getSubject();
     }
 
     public UUID getUserIdFromToken(String token) {
-        Jws<Claims> jwt = Jwts.parser().verifyWith(jwtSecret).build().parseSignedClaims(token);
+        Jws<Claims> jwt = Jwts.parser().verifyWith(jwtSecretKey).build().parseSignedClaims(token);
         String uid = (String) jwt.getPayload().get("uid");
         return uid != null ? UUID.fromString(uid) : null;
     }

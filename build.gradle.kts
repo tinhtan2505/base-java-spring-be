@@ -1,6 +1,6 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.5.4"
+	id("org.springframework.boot") version "3.5.5"
 	id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -34,6 +34,7 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:_")
 
 	// Swagger / OpenAPI
+	implementation("org.apache.commons:commons-lang3:3.18.0")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:_")
 
 	// Lombok
