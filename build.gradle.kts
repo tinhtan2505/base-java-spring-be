@@ -24,6 +24,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa:_")
 	implementation("org.springframework.boot:spring-boot-starter-security:_")
 	implementation("org.springframework.boot:spring-boot-starter-validation:_")
+	implementation("org.springframework.boot:spring-boot-starter-websocket:_")
+	implementation("org.springframework.boot:spring-boot-starter-security:_")
+	implementation("org.springframework.boot:spring-boot-starter-actuator:_")
+	implementation("org.springframework:spring-messaging:_")
+	implementation("org.springframework:spring-websocket:_")
 
 	// Database
 	runtimeOnly("org.postgresql:postgresql:_")

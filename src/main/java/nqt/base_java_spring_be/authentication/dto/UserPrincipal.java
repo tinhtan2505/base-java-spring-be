@@ -18,6 +18,7 @@ public class UserPrincipal implements UserDetails {
         this.username = username;
     }
 
+    @Override public String getUsername() { return username; }
     @Override public Collection<? extends GrantedAuthority> getAuthorities() { return Collections.emptyList(); }
     @Override public String getPassword() { return ""; }
     @Override public boolean isAccountNonExpired() { return true; }

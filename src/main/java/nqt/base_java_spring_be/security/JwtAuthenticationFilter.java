@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import nqt.base_java_spring_be.authentication.dto.UserPrincipal;
 import nqt.base_java_spring_be.entity.User;
@@ -25,11 +26,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+        // 0) Nếu đã có Authentication thì bỏ qua
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String bearer = request.getHeader("Authorization");
         String token = (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) ? bearer.substring(7) : null;
+
+        // ★ NEW: lấy token từ query (?token=...) – hữu ích cho SockJS handshake /ws?token=...
+        if (!StringUtils.hasText(token)) {
+            token = request.getParameter("token");
+        }
+
+        // ★ NEW: (tuỳ chọn) lấy token từ cookie "access_token"
+        if (!StringUtils.hasText(token) && request.getCookies() != null) {
+            for (var c : request.getCookies()) {
+                if ("access_token".equals(c.getName()) && StringUtils.hasText(c.getValue())) {
+                    token = c.getValue();
+                    break;
+                }
+            }
+        }
 
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
             String username = tokenProvider.getUsernameFromToken(token);
@@ -44,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // (B) Nếu token KHÔNG có uid: nạp DB để có id
                 User user = userRepository.findByUsername(username).orElse(null);
                 if (user != null) {
-                    principal = new UserPrincipal(user.getId(), user.getUsername());
+                    principal = new UserPrincipal(user.getId(), user.username());
                 } else {
                     filterChain.doFilter(request, response);
                     return;

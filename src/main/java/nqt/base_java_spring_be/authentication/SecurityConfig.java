@@ -5,6 +5,7 @@ import nqt.base_java_spring_be.security.JwtAuthenticationFilter;
 import nqt.base_java_spring_be.security.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,12 +52,18 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .authorizeHttpRequests(authorize ->
                         authorize
+                                // Preflight cho CORS
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/auth/**",
                                         "/swagger-ui/**",
                                         "/v3/api-docs/**",
                                         "/swagger-resources/**",
                                         "/swagger-ui.html",
                                         "/webjars/**").permitAll()
+                                // SockJS info probe phải mở để client lấy thông tin trước khi handshake
+                                .requestMatchers("/ws/info/**", "/ws/info").permitAll()
+                                // Handshake & các transport SockJS/WebSocket thật sự yêu cầu JWT
+                                .requestMatchers("/ws/**").authenticated()
                                 .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
