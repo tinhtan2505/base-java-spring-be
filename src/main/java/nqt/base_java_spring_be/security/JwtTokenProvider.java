@@ -27,9 +27,6 @@ public class JwtTokenProvider {
     // Tạo khóa bí mật 512-bit cho HS512
 //    private final SecretKey jwtSecret = Jwts.SIG.HS512.key().build();
     private final SecretKey jwtSecretKey;
-    private final long jwtExpirationMs;
-    private final String issuer; // optional
-    private final JwtParser jwtParser;
 
     public JwtTokenProvider(TokenBlacklist tokenBlacklist,
                             UserRepository userRepository,
@@ -38,8 +35,7 @@ public class JwtTokenProvider {
                             @Value("${jwt.issuer:}") String issuer) {
         this.tokenBlacklist = tokenBlacklist;
         this.userRepository = userRepository;
-        this.jwtExpirationMs = jwtExpirationMs;
-        this.issuer = issuer;
+        // optional
 
         // Cho phép lưu secret ở dạng Base64 hoặc plain text (>= 64 bytes cho HS512)
         byte[] keyBytes = tryDecodeBase64(secret);
@@ -49,7 +45,7 @@ public class JwtTokenProvider {
         this.jwtSecretKey = Keys.hmacShaKeyFor(keyBytes);
 
         // Reuse parser cho mọi lần verify
-        this.jwtParser = Jwts.parser()
+        JwtParser jwtParser = Jwts.parser()
                 .verifyWith(jwtSecretKey)
                 .build();
     }

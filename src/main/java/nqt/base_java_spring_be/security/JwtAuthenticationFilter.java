@@ -65,7 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // (B) Nếu token KHÔNG có uid: nạp DB để có id
                 User user = userRepository.findByUsername(username).orElse(null);
                 if (user != null) {
-                    principal = new UserPrincipal(user.getId(), user.username());
+                    principal = new UserPrincipal(user.getId(), user.getUsername());
                 } else {
                     filterChain.doFilter(request, response);
                     return;

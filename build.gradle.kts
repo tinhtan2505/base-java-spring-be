@@ -17,6 +17,8 @@ repositories {
 	mavenCentral()
 }
 
+extra["netty.version"] = "4.1.125.Final"
+
 dependencies {
 	// Spring Boot Core
 	implementation("org.springframework.boot:spring-boot-starter:_")
@@ -29,6 +31,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator:_")
 	implementation("org.springframework:spring-messaging:_")
 	implementation("org.springframework:spring-websocket:_")
+	implementation("org.springframework.boot:spring-boot-starter-reactor-netty")
 
 	// Database
 	runtimeOnly("org.postgresql:postgresql:_")

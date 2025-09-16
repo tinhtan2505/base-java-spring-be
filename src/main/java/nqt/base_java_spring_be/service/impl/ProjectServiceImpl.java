@@ -4,8 +4,11 @@ import lombok.RequiredArgsConstructor;
 import nqt.base_java_spring_be.entity.Project;
 import nqt.base_java_spring_be.exception.BadRequestException;
 import nqt.base_java_spring_be.exception.ResourceNotFoundException;
+import nqt.base_java_spring_be.realtime.RealtimeEvents;
 import nqt.base_java_spring_be.repository.ProjectRepository;
 import nqt.base_java_spring_be.service.iservices.ProjectService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import java.util.UUID;
 @Transactional
 public class ProjectServiceImpl  implements ProjectService {
     private final ProjectRepository repo;
+    private final RealtimeEvents realtime;
 
     @Override
     public Project create(Project project) {
@@ -27,7 +31,11 @@ public class ProjectServiceImpl  implements ProjectService {
         if (repo.existsByCode(project.getCode())) {
             throw new BadRequestException("Mã dự án đã tồn tại: " + project.getCode());
         }
-        return repo.save(project);
+        var saved = repo.save(project);
+
+        // 🔔 phát realtime (sẽ gửi sau COMMIT nhờ TransactionalEventListener)
+        realtime.emitCreated(saved, getActorUsername());
+        return saved;
     }
 
     @Override
@@ -75,9 +83,11 @@ public class ProjectServiceImpl  implements ProjectService {
         current.setTags(update.getTags());
         current.setDescription(update.getDescription());
 
-        // Không động vào: createdAt, updatedAt, deletedAt, active, createdBy, updatedBy (Auditing tự xử lý)
+        var saved = repo.save(current);
 
-        return repo.save(current);
+        // 🔔 phát realtime
+        realtime.emitUpdated(saved, getActorUsername());
+        return saved;
     }
 
 
@@ -86,6 +96,15 @@ public class ProjectServiceImpl  implements ProjectService {
         Project current = findById(id);
         current.markDeleted();
         repo.save(current);
+    }
+
+    private String getActorUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return "system";
+        Object principal = auth.getPrincipal();
+        if (principal instanceof nqt.base_java_spring_be.authentication.dto.UserPrincipal up) return up.getUsername();
+        if (principal instanceof org.springframework.security.core.userdetails.UserDetails ud) return ud.getUsername();
+        return auth.getName();
     }
 }
 
