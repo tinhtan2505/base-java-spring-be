@@ -55,6 +55,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         }
 
         // (Không bắt buộc) đặt rõ user destination prefix (mặc định là "/user")
-        registry.setUserDestinationPrefix("/app");
+        registry.setUserDestinationPrefix("/user");
     }
 }

@@ -15,7 +15,7 @@ public class WebSocketCommonConfig implements WebSocketMessageBrokerConfigurer {
     @Value("${app.websocket.endpoint:/ws}")
     private String websocketEndpoint;
 
-    @Value("${app.websocket.allowed-origins:http://localhost:3000,http://192.165.92.202:3000,https://*.tthhospital.vn}")
+    @Value("${app.websocket.allowed-origins:http://localhost:8686,http://192.165.92.202:3000,https://*.tthhospital.vn}")
     private String allowedOrigins;
 
     @Override
