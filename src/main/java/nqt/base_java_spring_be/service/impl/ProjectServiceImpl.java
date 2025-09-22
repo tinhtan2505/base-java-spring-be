@@ -34,7 +34,7 @@ public class ProjectServiceImpl  implements ProjectService {
         var saved = repo.save(project);
 
         // 🔔 phát realtime (sẽ gửi sau COMMIT nhờ TransactionalEventListener)
-//        realtime.emitCreated(saved, getActorUsername());
+        realtime.emitCreated("Project", saved.getId().toString(), saved, getActorUsername());
         return saved;
     }
 
@@ -86,7 +86,7 @@ public class ProjectServiceImpl  implements ProjectService {
         var saved = repo.save(current);
 
         // 🔔 phát realtime
-//        realtime.emitUpdated(saved, getActorUsername());
+        realtime.emitUpdated("Project", saved.getId().toString(), saved, getActorUsername());
         return saved;
     }
 
@@ -95,7 +95,9 @@ public class ProjectServiceImpl  implements ProjectService {
     public void delete(UUID id) {
         Project current = findById(id);
         current.markDeleted();
-        repo.save(current);
+        var saved = repo.save(current);
+
+        realtime.emitDeleted("Project", saved.getId().toString(), getActorUsername());
     }
 
     private String getActorUsername() {

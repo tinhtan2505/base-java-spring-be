@@ -10,13 +10,24 @@ public class RealtimeEvents {
 
     private final ApplicationEventPublisher publisher;
 
-    public <T> void emitCreated(T entity, String actor) {
-        publisher.publishEvent(new RealtimeDomainEvent<>(RealtimeAction.CREATED, entity, actor));
+    public <T> void emitCreated(String entity, String id, T data, String actor) {
+        publisher.publishEvent(CrudEvent.<T>builder()
+                .action(CrudEvent.Action.CREATED)
+                .entity(entity).id(id).data(data).actor(actor).ts(System.currentTimeMillis())
+                .build());
     }
-    public <T> void emitUpdated(T entity, String actor) {
-        publisher.publishEvent(new RealtimeDomainEvent<>(RealtimeAction.UPDATED, entity, actor));
+
+    public <T> void emitUpdated(String entity, String id, T data, String actor) {
+        publisher.publishEvent(CrudEvent.<T>builder()
+                .action(CrudEvent.Action.UPDATED)
+                .entity(entity).id(id).data(data).actor(actor).ts(System.currentTimeMillis())
+                .build());
     }
-    public <T> void emitDeleted(T entity, String actor) {
-        publisher.publishEvent(new RealtimeDomainEvent<>(RealtimeAction.DELETED, entity, actor));
+
+    public void emitDeleted(String entity, String id, String actor) {
+        publisher.publishEvent(CrudEvent.<Object>builder()
+                .action(CrudEvent.Action.DELETED)
+                .entity(entity).id(id).data(null).actor(actor).ts(System.currentTimeMillis())
+                .build());
     }
 }
