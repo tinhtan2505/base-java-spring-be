@@ -15,18 +15,18 @@ public class WebSocketEventListener {
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         accessor.getUser();
-        log.info("WS CONNECT: sessionId={}, user={}",
-                accessor.getSessionId(),
-                accessor.getUser().getName());
+//        log.info("WS CONNECT: sessionId={}, user={}",
+//                accessor.getSessionId(),
+//                accessor.getUser().getName());
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         accessor.getUser();
-        log.info("WS DISCONNECT: sessionId={}, user={}, closeStatus={}",
-                accessor.getSessionId(),
-                accessor.getUser().getName(),
-                event.getCloseStatus());
+//        log.info("WS DISCONNECT: sessionId={}, user={}, closeStatus={}",
+//                accessor.getSessionId(),
+//                accessor.getUser().getName(),
+//                event.getCloseStatus());
     }
 }

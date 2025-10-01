@@ -63,7 +63,7 @@ public class SecurityConfig {
                                 // SockJS info probe phải mở để client lấy thông tin trước khi handshake
                                 .requestMatchers("/ws/info/**", "/ws/info").permitAll()
                                 // Handshake & các transport SockJS/WebSocket thật sự yêu cầu JWT
-                                .requestMatchers("/ws/**").authenticated()
+                                .requestMatchers("/ws/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)
@@ -77,7 +77,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:8686")); // Thêm miền của bạn
+        configuration.setAllowedOrigins(List.of("http://localhost:8686","http://127.0.0.1:3000","http://127.0.0.1:8686")); // Thêm miền của bạn
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*")); // Cho phép tất cả các header
         configuration.setAllowCredentials(true); // Nếu bạn cần hỗ trợ cookie
